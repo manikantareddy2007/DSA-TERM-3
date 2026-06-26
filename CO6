@@ -1,0 +1,121 @@
+import java.util.Arrays;
+
+public class HeldKarpTSP {
+
+    // Held-Karp DP Algorithm
+    static int tsp(int n, int[][] dist) {
+
+        int[][] dp = new int[1 << n][n];
+
+        for (int[] row : dp)
+            Arrays.fill(row, Integer.MAX_VALUE);
+
+        // Start at Warehouse W (vertex 0)
+        dp[1][0] = 0;
+
+        for (int mask = 1; mask < (1 << n); mask++) {
+
+            for (int v = 0; v < n; v++) {
+
+                if ((mask & (1 << v)) == 0)
+                    continue;
+
+                if (dp[mask][v] == Integer.MAX_VALUE)
+                    continue;
+
+                // Extend path to an unvisited vertex u
+                for (int u = 0; u < n; u++) {
+
+                    if ((mask & (1 << u)) != 0)
+                        continue;
+
+                    int newMask = mask | (1 << u);
+
+                    dp[newMask][u] = Math.min(
+                            dp[newMask][u],
+                            dp[mask][v] + dist[v][u]
+                    );
+                }
+            }
+        }
+
+        // Close the tour by returning to W
+        int finalMask = (1 << n) - 1;
+        int answer = Integer.MAX_VALUE;
+
+        for (int v = 1; v < n; v++) {
+
+            if (dp[finalMask][v] != Integer.MAX_VALUE) {
+
+                answer = Math.min(
+                        answer,
+                        dp[finalMask][v] + dist[v][0]
+                );
+            }
+        }
+
+        return answer;
+    }
+
+    public static void main(String[] args) {
+
+        // Distance Matrix
+        // W=0, D1=1, D2=2, D3=3, D4=4
+
+        int[][] dist = {
+                {0, 10, 15, 20, 12},
+                {10, 0, 35, 25, 30},
+                {15, 35, 0, 30, 20},
+                {20, 25, 30, 0, 15},
+                {12, 30, 20, 15, 0}
+        };
+
+        int n = dist.length;
+
+        int optimalCost = tsp(n, dist);
+
+        System.out.println("===== Held-Karp TSP =====");
+        System.out.println("Optimal Closed Tour Cost = " + optimalCost + " km");
+
+        System.out.println("\nHeld-Karp Recurrence:");
+        System.out.println("Base Case:");
+        System.out.println("dp[{v}][v] = dist[W][v]");
+
+        System.out.println("\nRecurrence:");
+        System.out.println(
+                "dp[S][v] = min(dp[S-{v}][u] + dist[u][v])"
+        );
+
+        System.out.println("\nFinal Answer:");
+        System.out.println(
+                "min(dp[All][v] + dist[v][W])"
+        );
+
+        System.out.println("\nKey DP Cells:");
+        System.out.println("dp[{D1}][D1] = 10");
+        System.out.println("dp[{D2}][D2] = 15");
+        System.out.println("dp[{D1,D2}][D2] = 10 + 35 = 45");
+        System.out.println("dp[{D1,D2}][D1] = 15 + 35 = 50");
+
+        System.out.println("\nOne Optimal Tour:");
+        System.out.println("W -> D1 -> D3 -> D4 -> D2 -> W");
+
+        System.out.println("Distance = 10 + 25 + 15 + 20 + 15 = 85 km");
+
+        System.out.println("\nComplexities:");
+        System.out.println("Time Complexity  = O(n^2 * 2^n)");
+        System.out.println("Space Complexity = O(n * 2^n)");
+
+        System.out.println("\nPractical Limit:");
+        System.out.println("n > 22 becomes difficult due to exponential states.");
+        System.out.println("For larger instances use:");
+        System.out.println("1. Christofides Algorithm (1.5 Approximation)");
+        System.out.println("2. LKH Heuristic (Lin-Kernighan-Helsgaun)");
+        System.out.println("3. Branch and Bound");
+
+        System.out.println("\nReal-World Recommendation (Delhivery):");
+        System.out.println("For 30-50 deliveries per route,");
+        System.out.println("LKH Heuristic is typically preferred because");
+        System.out.println("it produces near-optimal routes very quickly.");
+    }
+}
