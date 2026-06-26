@@ -1,0 +1,120 @@
+import java.util.Arrays;
+
+public class IRCTCDutchFlag {
+
+    // S = 0, P = 1, F = 2
+
+    static void dutchFlag(int[] arr) {
+        int low = 0;
+        int mid = 0;
+        int high = arr.length - 1;
+
+        System.out.println("Initial Array:");
+        printStatusArray(arr);
+        System.out.println("low=" + low + " mid=" + mid + " high=" + high);
+        System.out.println();
+
+        int step = 1;
+
+        while (mid <= high) {
+
+            switch (arr[mid]) {
+
+                case 0: // SUCCESS
+                    swap(arr, low, mid);
+                    low++;
+                    mid++;
+                    break;
+
+                case 1: // PENDING
+                    mid++;
+                    break;
+
+                case 2: // FAILED
+                    swap(arr, mid, high);
+                    high--;
+                    break;
+            }
+
+            System.out.print("Step " + step + ": ");
+            printStatusArray(arr);
+            System.out.println("low=" + low +
+                    " mid=" + mid +
+                    " high=" + high);
+            System.out.println();
+
+            step++;
+        }
+
+        System.out.println("Final Partitioned Array:");
+        printStatusArray(arr);
+        System.out.println();
+        System.out.println("low=" + low +
+                " mid=" + mid +
+                " high=" + high);
+
+        System.out.println("\nTime Complexity  : O(n)");
+        System.out.println("Space Complexity : O(1)");
+
+        System.out.println("\nInvariant:");
+        System.out.println("arr[0..low-1]      = SUCCESS (S)");
+        System.out.println("arr[low..mid-1]    = PENDING (P)");
+        System.out.println("arr[mid..high]     = Unclassified");
+        System.out.println("arr[high+1..n-1]   = FAILED (F)");
+
+        System.out.println("\n3-Way Quicksort (Sketch):");
+        System.out.println("1. Choose a pivot.");
+        System.out.println("2. Partition into < pivot, == pivot, > pivot.");
+        System.out.println("3. Recursively sort < pivot region.");
+        System.out.println("4. Recursively sort > pivot region.");
+        System.out.println("5. Equal region needs no sorting.");
+
+        double standardQS = Math.log(50000) / Math.log(2);
+        double threeWayQS = Math.log(3) / Math.log(2);
+
+        System.out.printf(
+                "\nIRCTC Speedup (50,000 statuses, 3 distinct values): %.2fx%n",
+                standardQS / threeWayQS
+        );
+
+        System.out.println("\nStability:");
+        System.out.println("Dutch National Flag is NOT stable because swaps may");
+        System.out.println("change the relative order of equal elements.");
+        System.out.println("Example: Student grades where enrollment order");
+        System.out.println("within the same grade must be preserved.");
+        System.out.println("Stable alternative: Counting Sort with Prefix Sums");
+        System.out.println("Time: O(n + k), Space: O(n)");
+    }
+
+    static void swap(int[] a, int i, int j) {
+        int temp = a[i];
+        a[i] = a[j];
+        a[j] = temp;
+    }
+
+    static char status(int value) {
+        if (value == 0) return 'S';
+        if (value == 1) return 'P';
+        return 'F';
+    }
+
+    static void printStatusArray(int[] arr) {
+        for (int x : arr) {
+            System.out.print(status(x) + " ");
+        }
+        System.out.println();
+    }
+
+    public static void main(String[] args) {
+
+        // Input:
+        // [F, S, P, F, S, S, P, F, P, S, F, P]
+
+        int[] bookings = {
+                2, 0, 1, 2, 0, 0,
+                1, 2, 1, 0, 2, 1
+        };
+
+        dutchFlag(bookings);
+    }
+}
